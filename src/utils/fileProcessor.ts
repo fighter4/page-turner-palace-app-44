@@ -1,11 +1,10 @@
-
 // @ts-ignore - epubjs doesn't have official TypeScript types
 import ePub from 'epubjs';
 import * as pdfjsLib from 'pdfjs-dist';
 import { Book, BookContent } from '@/types/book';
 
-// Set up PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+// Set up PDF.js worker to use local file
+pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
 
 export const processFile = async (file: File): Promise<Book> => {
   const fileExtension = file.name.split('.').pop()?.toLowerCase();
@@ -95,51 +94,72 @@ const processEPUB = async (file: File): Promise<Book> => {
 };
 
 const processPDF = async (file: File): Promise<Book> => {
-  const arrayBuffer = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-  
-  const content: BookContent[] = [];
-  const maxPages = Math.min(pdf.numPages, 20); // Limit to first 20 pages for performance
-  
-  for (let pageNum = 1; pageNum <= maxPages; pageNum++) {
-    try {
-      const page = await pdf.getPage(pageNum);
-      const textContent = await page.getTextContent();
-      
-      const pageText = textContent.items
-        .map((item: any) => item.str)
-        .join(' ')
-        .trim();
-      
-      if (pageText.length > 50) { // Only include pages with substantial content
-        content.push({
-          id: `${Date.now()}-${pageNum}`,
-          chapterTitle: `Page ${pageNum}`,
-          content: pageText,
-          pageNumber: pageNum
-        });
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    
+    const content: BookContent[] = [];
+    const maxPages = Math.min(pdf.numPages, 20); // Limit to first 20 pages for performance
+    
+    for (let pageNum = 1; pageNum <= maxPages; pageNum++) {
+      try {
+        const page = await pdf.getPage(pageNum);
+        const textContent = await page.getTextContent();
+        
+        const pageText = textContent.items
+          .map((item: any) => item.str)
+          .join(' ')
+          .trim();
+        
+        if (pageText.length > 50) { // Only include pages with substantial content
+          content.push({
+            id: `${Date.now()}-${pageNum}`,
+            chapterTitle: `Page ${pageNum}`,
+            content: pageText,
+            pageNumber: pageNum
+          });
+        }
+      } catch (error) {
+        console.warn(`Error processing PDF page ${pageNum}:`, error);
       }
-    } catch (error) {
-      console.warn(`Error processing PDF page ${pageNum}:`, error);
     }
+    
+    return {
+      id: Date.now().toString(),
+      title: file.name.replace(/\.pdf$/i, ''),
+      author: 'Unknown Author',
+      content: content.length > 0 ? content : [{
+        id: `${Date.now()}-1`,
+        chapterTitle: 'Content',
+        content: 'Unable to extract readable content from this PDF file.',
+        pageNumber: 1
+      }],
+      totalPages: content.length || 1,
+      lastReadPosition: 0,
+      bookmarks: [],
+      dateAdded: new Date(),
+      fileSize: `${(file.size / 1024 / 1024).toFixed(1)} MB`
+    };
+  } catch (error) {
+    console.error('PDF processing error:', error);
+    // Return a fallback book object if PDF processing fails
+    return {
+      id: Date.now().toString(),
+      title: file.name.replace(/\.pdf$/i, ''),
+      author: 'Unknown Author',
+      content: [{
+        id: `${Date.now()}-1`,
+        chapterTitle: 'Error',
+        content: `Failed to process PDF: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        pageNumber: 1
+      }],
+      totalPages: 1,
+      lastReadPosition: 0,
+      bookmarks: [],
+      dateAdded: new Date(),
+      fileSize: `${(file.size / 1024 / 1024).toFixed(1)} MB`
+    };
   }
-  
-  return {
-    id: Date.now().toString(),
-    title: file.name.replace(/\.pdf$/i, ''),
-    author: 'Unknown Author',
-    content: content.length > 0 ? content : [{
-      id: `${Date.now()}-1`,
-      chapterTitle: 'Content',
-      content: 'Unable to extract readable content from this PDF file.',
-      pageNumber: 1
-    }],
-    totalPages: content.length || 1,
-    lastReadPosition: 0,
-    bookmarks: [],
-    dateAdded: new Date(),
-    fileSize: `${(file.size / 1024 / 1024).toFixed(1)} MB`
-  };
 };
 
 const processTXT = async (file: File): Promise<Book> => {
