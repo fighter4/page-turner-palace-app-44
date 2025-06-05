@@ -1,4 +1,5 @@
 
+// @ts-ignore - epubjs doesn't have official TypeScript types
 import ePub from 'epubjs';
 import * as pdfjsLib from 'pdfjs-dist';
 import { Book, BookContent } from '@/types/book';
@@ -55,7 +56,7 @@ const processEPUB = async (file: File): Promise<Book> => {
   // If no TOC, try to get spine items
   if (content.length === 0) {
     const spine = await book.loaded.spine;
-    for (const item of spine.items.slice(0, 10)) { // Limit to first 10 items
+    for (const item of spine.slice(0, 10)) { // Fixed: removed .items
       try {
         const section = book.section(item.href);
         const sectionContent = await section.load(book.load.bind(book));
