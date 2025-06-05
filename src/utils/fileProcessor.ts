@@ -1,7 +1,8 @@
+
 // @ts-ignore - epubjs doesn't have official TypeScript types
 import ePub from 'epubjs';
 import * as pdfjsLib from 'pdfjs-dist';
-import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry';
+import pdfjsWorker from 'pdfjs-dist/webpack';
 import { Book, BookContent } from '@/types/book';
 
 // Set up PDF.js worker - use bundled worker to avoid CDN/CORS issues
