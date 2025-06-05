@@ -3,8 +3,8 @@ import ePub from 'epubjs';
 import * as pdfjsLib from 'pdfjs-dist';
 import { Book, BookContent } from '@/types/book';
 
-// Set up PDF.js worker to use local file
-pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
+// Set up PDF.js worker - use CDN without ?import parameter
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.3.31/pdf.worker.min.js';
 
 export const processFile = async (file: File): Promise<Book> => {
   const fileExtension = file.name.split('.').pop()?.toLowerCase();
