@@ -1,10 +1,8 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Book } from '@/types/book';
-import { ArrowUp, BookOpen, Search, Settings } from 'lucide-react';
+import { ArrowLeft, Menu, Settings, Search, X, Bookmark } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { useReadingSettings } from '@/contexts/ReadingSettingsContext';
 
 interface ReadingHeaderProps {
   book: Book;
@@ -12,6 +10,7 @@ interface ReadingHeaderProps {
   onBackToLibrary: () => void;
   onToggleTOC: () => void;
   onToggleSettings: () => void;
+  onToggleBookmarks: () => void;
   searchTerm: string;
   onSearchChange: (term: string) => void;
   searchResults: Array<{ pageNumber: number; snippet: string }>;
@@ -24,55 +23,48 @@ const ReadingHeader: React.FC<ReadingHeaderProps> = ({
   onBackToLibrary,
   onToggleTOC,
   onToggleSettings,
+  onToggleBookmarks,
   searchTerm,
   onSearchChange,
   searchResults,
   onSearchResultClick,
 }) => {
-  const { settings } = useReadingSettings();
-  const [showSearch, setShowSearch] = useState(false);
-
-  const getThemeClasses = () => {
-    switch (settings.theme) {
-      case 'dark':
-        return 'bg-gray-800 border-gray-700 text-gray-100';
-      case 'sepia':
-        return 'bg-amber-100 border-amber-200 text-amber-900';
-      default:
-        return 'bg-white border-gray-200 text-gray-900';
-    }
-  };
-
-  const getProgressPercentage = () => {
-    return Math.round((currentPage / book.totalPages) * 100);
-  };
+  const [showSearch, setShowSearch] = React.useState(false);
 
   return (
-    <header className={`sticky top-0 z-50 border-b transition-colors duration-300 ${getThemeClasses()}`}>
+    <header className="sticky top-0 z-40 bg-white border-b shadow-sm">
       <div className="flex items-center justify-between px-4 py-3">
-        <div className="flex items-center space-x-4">
+        {/* Left section */}
+        <div className="flex items-center space-x-3">
           <Button
             variant="ghost"
             size="sm"
             onClick={onBackToLibrary}
-            className="rounded-lg hover:bg-opacity-10"
+            className="rounded-lg"
           >
-            <ArrowUp className="w-4 h-4 mr-2" />
-            Library
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            <span className="hidden sm:inline">Library</span>
           </Button>
           
-          <div className="hidden md:block">
-            <h1 className="font-semibold text-lg truncate max-w-xs">{book.title}</h1>
-            <p className="text-sm opacity-70">{book.author}</p>
-          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggleTOC}
+            className="rounded-lg"
+          >
+            <Menu className="w-4 h-4" />
+            <span className="hidden sm:inline ml-2">Contents</span>
+          </Button>
         </div>
 
-        <div className="flex items-center space-x-2">
-          <div className="hidden sm:flex items-center space-x-4 text-sm">
-            <span>Page {currentPage} of {book.totalPages}</span>
-            <span>{getProgressPercentage()}%</span>
-          </div>
+        {/* Center section - Book info */}
+        <div className="flex-1 text-center px-4">
+          <h1 className="font-semibold text-gray-900 truncate">{book.title}</h1>
+          <p className="text-sm text-gray-600 truncate">{book.author}</p>
+        </div>
 
+        {/* Right section */}
+        <div className="flex items-center space-x-2">
           <Button
             variant="ghost"
             size="sm"
@@ -81,16 +73,16 @@ const ReadingHeader: React.FC<ReadingHeaderProps> = ({
           >
             <Search className="w-4 h-4" />
           </Button>
-
+          
           <Button
             variant="ghost"
             size="sm"
-            onClick={onToggleTOC}
+            onClick={onToggleBookmarks}
             className="rounded-lg"
           >
-            <BookOpen className="w-4 h-4" />
+            <Bookmark className="w-4 h-4" />
           </Button>
-
+          
           <Button
             variant="ghost"
             size="sm"
@@ -102,50 +94,52 @@ const ReadingHeader: React.FC<ReadingHeaderProps> = ({
         </div>
       </div>
 
-      {/* Progress bar */}
-      <div className="h-1 bg-gray-200">
-        <div
-          className="h-full bg-amber-500 transition-all duration-300"
-          style={{ width: `${getProgressPercentage()}%` }}
-        ></div>
-      </div>
-
-      {/* Search panel */}
+      {/* Search bar */}
       {showSearch && (
-        <div className={`border-t p-4 ${getThemeClasses()}`}>
-          <div className="relative mb-4">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 opacity-50" />
-            <Input
+        <div className="border-t bg-gray-50 p-4">
+          <div className="relative max-w-md mx-auto">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
               type="text"
               placeholder="Search in this book..."
               value={searchTerm}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-10 rounded-lg"
+              className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              autoFocus
             />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setShowSearch(false);
+                onSearchChange('');
+              }}
+              className="absolute right-1 top-1/2 transform -translate-y-1/2 p-1 h-auto"
+            >
+              <X className="w-4 h-4" />
+            </Button>
           </div>
 
+          {/* Search results */}
           {searchResults.length > 0 && (
-            <div className="max-h-60 overflow-y-auto space-y-2">
+            <div className="mt-4 max-w-md mx-auto bg-white border rounded-lg shadow-lg max-h-48 overflow-y-auto">
               {searchResults.map((result, index) => (
-                <div
+                <button
                   key={index}
-                  className="p-3 rounded-lg border cursor-pointer hover:bg-opacity-50 hover:bg-gray-100 transition-colors"
                   onClick={() => {
                     onSearchResultClick(result.pageNumber);
                     setShowSearch(false);
+                    onSearchChange('');
                   }}
+                  className="w-full text-left p-3 hover:bg-gray-50 border-b last:border-b-0"
                 >
-                  <div className="flex justify-between items-start mb-1">
-                    <span className="text-sm font-medium">Page {result.pageNumber}</span>
+                  <div className="text-sm font-medium">Page {result.pageNumber}</div>
+                  <div className="text-xs text-gray-600 truncate">
+                    ...{result.snippet}...
                   </div>
-                  <p className="text-sm opacity-80">...{result.snippet}...</p>
-                </div>
+                </button>
               ))}
             </div>
-          )}
-
-          {searchTerm && searchResults.length === 0 && (
-            <p className="text-center text-sm opacity-60 py-4">No results found</p>
           )}
         </div>
       )}

@@ -7,6 +7,8 @@ import ReadingHeader from './ReadingHeader';
 import ReadingContent from './ReadingContent';
 import TableOfContents from './TableOfContents';
 import ReadingSettings from './ReadingSettings';
+import BookmarkSidebar from './BookmarkSidebar';
+import ReadingNavigation from './ReadingNavigation';
 
 interface ReadingViewProps {
   book: Book;
@@ -18,6 +20,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ book, onBackToLibrary }) => {
   const { settings } = useReadingSettings();
   const [showTOC, setShowTOC] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showBookmarks, setShowBookmarks] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<Array<{ pageNumber: number; snippet: string }>>([]);
 
@@ -103,13 +106,14 @@ const ReadingView: React.FC<ReadingViewProps> = ({ book, onBackToLibrary }) => {
         onBackToLibrary={onBackToLibrary}
         onToggleTOC={() => setShowTOC(!showTOC)}
         onToggleSettings={() => setShowSettings(!showSettings)}
+        onToggleBookmarks={() => setShowBookmarks(!showBookmarks)}
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         searchResults={searchResults}
         onSearchResultClick={(pageNumber) => setCurrentPage(pageNumber)}
       />
 
-      <div className="flex">
+      <div className="flex min-h-screen">
         <TableOfContents
           book={book}
           currentPage={currentPage}
@@ -118,19 +122,35 @@ const ReadingView: React.FC<ReadingViewProps> = ({ book, onBackToLibrary }) => {
           onPageSelect={setCurrentPage}
         />
 
-        <main className="flex-1 transition-all duration-300">
-          <ReadingContent
-            chapter={currentChapter}
+        <main className="flex-1 transition-all duration-300 flex flex-col">
+          <div className="flex-1">
+            <ReadingContent
+              chapter={currentChapter}
+              currentPage={currentPage}
+              totalPages={book.totalPages}
+              onPageChange={setCurrentPage}
+              className={`${getFontSizeClass()} ${getFontFamilyClass()} ${getLineHeightClass()}`}
+            />
+          </div>
+          
+          <ReadingNavigation
+            book={book}
             currentPage={currentPage}
-            totalPages={book.totalPages}
             onPageChange={setCurrentPage}
-            className={`${getFontSizeClass()} ${getFontFamilyClass()} ${getLineHeightClass()}`}
           />
         </main>
 
         <ReadingSettings
           isOpen={showSettings}
           onClose={() => setShowSettings(false)}
+        />
+
+        <BookmarkSidebar
+          book={book}
+          currentPage={currentPage}
+          isOpen={showBookmarks}
+          onClose={() => setShowBookmarks(false)}
+          onPageSelect={setCurrentPage}
         />
       </div>
     </div>
