@@ -1,12 +1,10 @@
-
 // @ts-ignore - epubjs doesn't have official TypeScript types
 import ePub from 'epubjs';
 import * as pdfjsLib from 'pdfjs-dist';
-import pdfjsWorker from 'pdfjs-dist/webpack';
 import { Book, BookContent } from '@/types/book';
 
-// Set up PDF.js worker - use bundled worker to avoid CDN/CORS issues
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+// Set up PDF.js worker using the correct worker entry point
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 export const processFile = async (file: File): Promise<Book> => {
   const fileExtension = file.name.split('.').pop()?.toLowerCase();
