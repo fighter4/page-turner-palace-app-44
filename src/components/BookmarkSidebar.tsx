@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Book, Bookmark } from '@/types/book';
 import { useBooks } from '@/contexts/BookContext';
 import { useReadingSettings } from '@/contexts/ReadingSettingsContext';
-import { X, Bookmark as BookmarkIcon, Edit, Trash2, Plus } from 'lucide-react';
+import { X, Bookmark as BookmarkIcon, Trash2, Plus } from 'lucide-react'; // Removed Edit
 import { Button } from '@/components/ui/button';
 
 interface BookmarkSidebarProps {
@@ -24,7 +24,8 @@ const BookmarkSidebar: React.FC<BookmarkSidebarProps> = ({
   const { addBookmark, removeBookmark } = useBooks();
   const { settings } = useReadingSettings();
   const [newBookmarkNote, setNewBookmarkNote] = useState('');
-  const [editingBookmark, setEditingBookmark] = useState<string | null>(null);
+  // Removed unused state:
+  // const [editingBookmark, setEditingBookmark] = useState<string | null>(null);
 
   const getThemeClasses = () => {
     switch (settings.theme) {

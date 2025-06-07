@@ -1,10 +1,16 @@
-// @ts-ignore - epubjs doesn't have official TypeScript types
+// @ts-expect-error - epubjs doesn't have official TypeScript types
 import ePub from 'epubjs';
 import * as pdfjsLib from 'pdfjs-dist';
 import { Book, BookContent } from '@/types/book';
 
 // Set up PDF.js worker using the correct worker entry point
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+
+// Minimal type for PDF.js text item
+interface PdfTextItem {
+  str: string;
+  // Other properties can be added if needed, like dir, width, height, transform, fontName
+}
 
 export const processFile = async (file: File): Promise<Book> => {
   const fileExtension = file.name.split('.').pop()?.toLowerCase();
@@ -107,7 +113,7 @@ const processPDF = async (file: File): Promise<Book> => {
         const textContent = await page.getTextContent();
         
         const pageText = textContent.items
-          .map((item: any) => item.str)
+          .map((item: PdfTextItem) => item.str)
           .join(' ')
           .trim();
         
