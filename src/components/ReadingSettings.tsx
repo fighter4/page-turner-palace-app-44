@@ -70,7 +70,7 @@ const ReadingSettings: React.FC<ReadingSettingsProps> = ({ isOpen, onClose }) =>
               ].map((theme) => (
                 <button
                   key={theme.key}
-                  onClick={() => updateSettings({ theme: theme.key as any })}
+                  onClick={() => updateSettings({ theme: theme.key })}
                   className={`
                     p-3 rounded-lg border-2 transition-all duration-200
                     ${theme.color}
@@ -103,7 +103,7 @@ const ReadingSettings: React.FC<ReadingSettingsProps> = ({ isOpen, onClose }) =>
               ].map((size) => (
                 <button
                   key={size.key}
-                  onClick={() => updateSettings({ fontSize: size.key as any })}
+                  onClick={() => updateSettings({ fontSize: size.key })}
                   className={`
                     w-full p-3 rounded-lg border transition-all duration-200 text-left
                     ${settings.fontSize === size.key 
@@ -132,7 +132,7 @@ const ReadingSettings: React.FC<ReadingSettingsProps> = ({ isOpen, onClose }) =>
               ].map((font) => (
                 <button
                   key={font.key}
-                  onClick={() => updateSettings({ fontFamily: font.key as any })}
+                  onClick={() => updateSettings({ fontFamily: font.key })}
                   className={`
                     w-full p-3 rounded-lg border transition-all duration-200 text-left
                     ${font.class}
@@ -162,7 +162,7 @@ const ReadingSettings: React.FC<ReadingSettingsProps> = ({ isOpen, onClose }) =>
               ].map((lineHeight) => (
                 <button
                   key={lineHeight.key}
-                  onClick={() => updateSettings({ lineHeight: lineHeight.key as any })}
+                  onClick={() => updateSettings({ lineHeight: lineHeight.key })}
                   className={`
                     w-full p-3 rounded-lg border transition-all duration-200 text-left
                     ${lineHeight.class}

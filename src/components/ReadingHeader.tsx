@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 
 interface ReadingHeaderProps {
   book: Book;
-  currentPage: number;
+  // currentPage: number; // Removed as it's unused
   onBackToLibrary: () => void;
   onToggleTOC: () => void;
   onToggleSettings: () => void;
@@ -19,7 +19,7 @@ interface ReadingHeaderProps {
 
 const ReadingHeader: React.FC<ReadingHeaderProps> = ({
   book,
-  currentPage,
+  // currentPage, // Removed as it's unused
   onBackToLibrary,
   onToggleTOC,
   onToggleSettings,

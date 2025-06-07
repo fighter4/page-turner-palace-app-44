@@ -127,15 +127,44 @@ export const BookProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const addBookmark = (bookmark: Bookmark) => {
-    const updatedBookmarks = [...bookmarks, bookmark];
-    setBookmarks(updatedBookmarks);
-    localStorage.setItem('ebookReaderBookmarks', JSON.stringify(updatedBookmarks));
+    // Add to global bookmarks list
+    const updatedGlobalBookmarks = [...bookmarks, bookmark];
+    setBookmarks(updatedGlobalBookmarks);
+    localStorage.setItem('ebookReaderBookmarks', JSON.stringify(updatedGlobalBookmarks));
+
+    // Add to the specific book's bookmarks array
+    const updatedBooks = books.map(b => {
+      if (b.id === bookmark.bookId) {
+        const newBookBookmarks = [...(b.bookmarks || []), bookmark];
+        return { ...b, bookmarks: newBookBookmarks };
+      }
+      return b;
+    });
+    setBooks(updatedBooks);
+    localStorage.setItem('ebookReaderBooks', JSON.stringify(updatedBooks));
   };
 
   const removeBookmark = (bookmarkId: string) => {
-    const updatedBookmarks = bookmarks.filter(b => b.id !== bookmarkId);
-    setBookmarks(updatedBookmarks);
-    localStorage.setItem('ebookReaderBookmarks', JSON.stringify(updatedBookmarks));
+    // Find the bookmark to get its bookId before removing from global list
+    const bookmarkToRemove = bookmarks.find(b => b.id === bookmarkId);
+
+    // Remove from global bookmarks list
+    const updatedGlobalBookmarks = bookmarks.filter(b => b.id !== bookmarkId);
+    setBookmarks(updatedGlobalBookmarks);
+    localStorage.setItem('ebookReaderBookmarks', JSON.stringify(updatedGlobalBookmarks));
+
+    if (bookmarkToRemove) {
+      // Remove from the specific book's bookmarks array
+      const updatedBooks = books.map(b => {
+        if (b.id === bookmarkToRemove.bookId) {
+          const newBookBookmarks = (b.bookmarks || []).filter(bm => bm.id !== bookmarkId);
+          return { ...b, bookmarks: newBookBookmarks };
+        }
+        return b;
+      });
+      setBooks(updatedBooks);
+      localStorage.setItem('ebookReaderBooks', JSON.stringify(updatedBooks));
+    }
   };
 
   const updateReadingProgress = (bookId: string, page: number) => {
